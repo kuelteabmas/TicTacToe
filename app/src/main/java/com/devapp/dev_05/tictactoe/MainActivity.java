@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                resetGame();
             }
         });
 
@@ -62,6 +63,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Increase the round count
         roundCount++;
+
+        if (checkForWin()){
+            if (player1Turn) {
+                player1Wins();
+            } else {
+                player2Wins();
+            }
+        }
+
+        // If there's a draw
+        else if (roundCount == 9) {
+            draw();
+        }
+
+        // If there's no Win or Draw
+        else {
+            player1Turn = !player1Turn;
+        }
     }
 
 
@@ -106,5 +125,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return true;
         }
 
+        return false;
+    }
+
+    private void player1Wins() {
+        player1Points++; // Increment Player 1's score
+        Toast.makeText(this, "Player 1 wins!", Toast.LENGTH_SHORT).show(); // Show win message
+        updatePointsText();
+        resetBoard();
+    }
+
+    private void player2Wins(){
+        player2Points++; // Increment Player 2's score
+        Toast.makeText(this, "Player 2 wins!", Toast.LENGTH_SHORT).show(); // Show win message
+        updatePointsText();
+        resetBoard();
+    }
+
+    private void draw() {
+        Toast.makeText(this, "Draw!", Toast.LENGTH_SHORT).show(); // Show Draw message
+        resetBoard();
+    }
+
+    private void updatePointsText() {
+        TVplayer1.setText("Player 1: "+ player1Points);
+        TVplayer2.setText("Player 2: " + player2Points);
+    }
+
+    private void resetBoard() {
+        for (int row = 0; row <3; row++) {
+            for (int col = 0; col <3; col++) {
+                buttons[row][col].setText(""); // Set text button to zero; empty it
+            }
+        }
+
+        roundCount = 0; // Reset round count
+        player1Turn = true; // Player 1's turn once game has been reset
+    }
+
+    private void resetGame() {
+        player2Points = 0;
+        player1Points = 0;
+        updatePointsText();
+        resetBoard();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("roundCount", roundCount);
+        outState.putInt("player1Points", player1Points);
+        outState.putInt("player2Points", player2Points);
+        outState.putBoolean("player1Turn", player1Turn);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        roundCount = savedInstanceState.getInt("roundCount");
+        player1Points = savedInstanceState.getInt("player1Points");
+        player2Points = savedInstanceState.getInt("player2Points");
+        player1Turn = savedInstanceState.getBoolean("player1Turn");
     }
 }
